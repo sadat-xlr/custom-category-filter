@@ -32,30 +32,23 @@ class Custom_WooCommerce_Filter_Widget extends WP_Widget {
 
 
         $title = apply_filters('widget_title', $instance['title']);
-        if (!empty($title)) {
-            echo $args['before_title'] . $title . $args['after_title'];
-        }
-
         echo '<form id="formname" action="" method="GET">';
-        echo '<label for="product_cat">Filter by Category:</label>';
-     
+        if (!empty($title)) {
+            echo $args['before_title'] . '<label for="product_cat">'. $title .'</label>'. $args['after_title'];
+        }
         // Get product categories
 		// Get the selected categories from the URL
-       
         $categories = get_terms('product_cat', array('hide_empty' => false));
-        
         foreach ($categories as $category) {
             $selected_categories = isset($_GET['product_cat']) ? (array)$_GET['product_cat'] : array();
 			$isChecked = in_array($category->slug, $selected_categories) ? 'checked' : '';
 
 			echo '<input class="category-filter-checkbox" type="checkbox" name="product_cat" value="' . $category->slug . '" '.$isChecked.'> ' . $category->name . '<br>';
         }
-        echo '<input type="submit" value="Filter">';
+        echo '<input type="submit" style="display:none" value="Filter">';
         echo '</form>';
         echo $args['after_widget'];
     }
-
-
     // Widget Form
     public function form($instance) {
         $title = !empty($instance['title']) ? $instance['title'] : __('Filter Products', 'storefront');
@@ -66,7 +59,6 @@ class Custom_WooCommerce_Filter_Widget extends WP_Widget {
         </p>
         <?php
     }
-
     // Update Widget Settings
     public function update($new_instance, $old_instance) {
         $instance = array();
@@ -75,12 +67,6 @@ class Custom_WooCommerce_Filter_Widget extends WP_Widget {
         return $instance;
     }
 }
-function is_category_selected($category_slug) {
-    if (isset($_GET['product_cat']) && in_array($category_slug, (array)$_GET['product_cat'])) {
-        return true;
-    }
-    return false;
-}
 
 // Register the widget
 function register_custom_woocommerce_filter_widget() {
@@ -88,9 +74,9 @@ function register_custom_woocommerce_filter_widget() {
 }
 add_action('widgets_init', 'register_custom_woocommerce_filter_widget');
 
+//enqueue scripts
 function enqueue_custom_widget_script() {
     wp_register_script('custom-product-filter', plugins_url('js/custom-product-filter.js', __FILE__), array('jquery'), '1.0', true);
     wp_enqueue_script('custom-product-filter');
 }
-
 add_action('wp_enqueue_scripts', 'enqueue_custom_widget_script');
